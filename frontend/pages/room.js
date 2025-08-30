@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Text,
   View,
@@ -12,19 +12,29 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
-import ChatData from "../chat.json";
+  import { SafeAreaView } from "react-native-safe-area-context";
+  import * as ImagePicker from "expo-image-picker";
+  import ChatData from "../chat.json";
+  import { Ionicons } from "@expo/vector-icons";
+  import { Clipboard } from 'react-native';
 
-export default function RoomPage() {
+export default function RoomPage({navigation , route}) {
+
   /** ==============================
    * 1️⃣ กำหนดผู้ใช้ปัจจุบันและห้องแชท
    ===============================*/
-  const currentUserId = "205";
-  const roomId = "42565412";
+
+  const currentUserId = "101";
+  
+  const { Idroom  } = route.params || {};
+
+  const roomId = Idroom  ? Idroom .toString() : "";
 
   const room = ChatData.rooms.find((r) => r.RoomID === roomId);
+
   if (!room) return <Text>Room not found</Text>;
+
+  const RoomIdname  = room.RoomID;
 
   const currentUser = room.users[currentUserId];
   const currentUserRole = currentUser?.role || "buyer";
@@ -63,6 +73,7 @@ export default function RoomPage() {
   const handleTextChange = useCallback((text) => setInputText(text), []);
 
   const sendMessage = () => {
+
     if (inputText.trim() === "") return;
     const newMsg = {
       id: Date.now().toString(),
@@ -84,10 +95,19 @@ export default function RoomPage() {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 300);
   };
 
+
+  const handleCopy = () => {
+    const textToCopy = RoomIdname; // เปลี่ยนเป็นข้อความที่ต้องการ
+      Clipboard.setString(textToCopy);
+  };
+
+
   /** ==============================
    * 6️⃣ ใบเสนอราคา - ตรวจสอบที่ยังไม่ชำระ (สำหรับผู้ซื้อ)
    ===============================*/
+
   const pendingQuotations = messages.filter(
+
     (msg) =>
       msg.type === "quotation" &&
       msg.sender_id !== currentUserId &&
@@ -103,12 +123,13 @@ export default function RoomPage() {
    * 7️⃣ ฟังก์ชันเลือกภาพใบเสนอราคา
    ===============================*/
   const pickImage = async () => {
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") return alert("ต้องอนุญาตเข้าถึงรูปภาพ");
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.7,
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
     });
     if (!result.canceled) {
       const uri = result.assets[0].uri;
@@ -143,16 +164,20 @@ export default function RoomPage() {
    ===============================*/
   const handlePayQuotation = (quotationId) => {
 
-
-    // อัพเดตใบเสนอราคาเป็นชำระเงินแล้ว
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === quotationId
-          ? { ...msg, quotation: { ...msg.quotation, status: true } }
-          : msg
-      )
-    );
+    // setMessages((prev) =>
+    //   prev.map((msg) =>
+    //     msg.id === quotationId
+    //       ? { ...msg, quotation: { ...msg.quotation, status: true } }
+    //       : msg
+    //   )
+    // );
     // เพิ่มข้อความระบบในแชท
+
+    navigation.navigate("PaymentPage", { 
+      roomId: roomId 
+    });
+
+    
     const paidMsg = {
       id: (Date.now() + 1).toString(),
       type: "system",
@@ -184,16 +209,23 @@ export default function RoomPage() {
    ===============================*/
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={["top", "bottom"]}>
+      
       <StatusBar barStyle="light-content" backgroundColor="#3B82F6" />
 
       {/* Header */}
       <View className="bg-blue-500 shadow-sm">
         <View className="flex-row items-center justify-between px-4 py-3">
-          <View className="flex-row items-center">
-            <View className="w-10 h-10 bg-blue-400 rounded-full items-center justify-center mr-3">
-              <Text className="text-white font-bold text-lg">A</Text>
-            </View>
-            <Text className="text-white font-semibold text-lg">{currentUser.name}</Text>
+          <View className="flex-row items-center justify-between  w-full">
+              <TouchableOpacity 
+                onPress={() => navigation.navigate("Home")} 
+                className="w-10 h-10 bg-blue-400 rounded-full items-center justify-center mr-3"
+              >
+                <Ionicons name="arrow-back" size={24} color="white" />
+              </TouchableOpacity>
+            <Text className="text-white font-semibold text-lg">หมายเลขห้อง : {RoomIdname}</Text>
+            <TouchableOpacity onPress={handleCopy} className="text-white font-semibold text-lg">
+              <Text className="font-semibold text-white border-b-2 border-white/50">คัดลอก</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

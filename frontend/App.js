@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginPage from "./pages/login";
 import Homepage from "./pages/home";
 import RoomPage from "./pages/room";
+import PaymentPage from "./pages/Qrcode";
 
 const Stack = createNativeStackNavigator();
 
@@ -14,7 +15,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Room"
+        initialRouteName="Home"
         screenOptions={{
           headerShown: false,
           animation: "fade",
@@ -23,6 +24,8 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Home" component={Homepage} />
         <Stack.Screen name="Room" component={RoomPage} />
+        <Stack.Screen name="PaymentPage" component={PaymentPage} screenOptions={{animation: "fade"}} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
