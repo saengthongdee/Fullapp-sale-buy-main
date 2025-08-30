@@ -164,14 +164,13 @@ export default function RoomPage({navigation , route}) {
    ===============================*/
   const handlePayQuotation = (quotationId) => {
 
-    // setMessages((prev) =>
-    //   prev.map((msg) =>
-    //     msg.id === quotationId
-    //       ? { ...msg, quotation: { ...msg.quotation, status: true } }
-    //       : msg
-    //   )
-    // );
-    // เพิ่มข้อความระบบในแชท
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === quotationId
+          ? { ...msg, quotation: { ...msg.quotation, status: true } }
+          : msg
+      )
+    );
 
     navigation.navigate("PaymentPage", { 
       roomId: roomId 
@@ -186,6 +185,7 @@ export default function RoomPage({navigation , route}) {
       receiver: "admin",
     };
     setMessages((prev) => [...prev, paidMsg]);
+
   };
 
   /** ==============================
