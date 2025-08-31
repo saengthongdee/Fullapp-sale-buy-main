@@ -1,4 +1,5 @@
 import {
+  
   Text,
   View,
   TouchableOpacity,
@@ -10,6 +11,7 @@ import {
   Keyboard,
   Platform,
   ScrollView,
+
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
@@ -23,6 +25,7 @@ export default function HomePage({ navigation }) {
   const [errorRole , setErrorRole] = useState(true);
 
   const handleInput = () => {
+
     Keyboard.dismiss();
     if (Idroom === "42565412") {
       setNotFound(false);

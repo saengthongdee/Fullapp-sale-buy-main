@@ -24,7 +24,13 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Home" component={Homepage} />
         <Stack.Screen name="Room" component={RoomPage} />
-        <Stack.Screen name="PaymentPage" component={PaymentPage} screenOptions={{animation: "fade"}} />
+        <Stack.Screen 
+            name="PaymentPage" 
+            component={PaymentPage} 
+            options={{
+              animation: "slide_from_right",
+            }} 
+          />
 
       </Stack.Navigator>
     </NavigationContainer>

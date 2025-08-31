@@ -9,25 +9,68 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import PaymentData from '../Payment.json';
 
 export default function PaymentPage({ navigation, route }) {
-
   const { roomId } = route.params || {};
 
   const [selectedPayment, setSelectedPayment] = useState("");
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [creditAmount, setCreditAmount] = useState("");
   const [qrcode, setQrcode] = useState(false);
+  const [quotationData, setQuotationData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // ข้อมูลใบเสนอราคา (จำลอง)
-  const quotationData = {
-    productName: "iPhone 15 Pro",
-    details: "สีดำ 256GB ใหม่มือ 1 ประกัน Apple Care+",
-    price: "45000",
-    images: "https://example.com/iphone.jpg",
+  // ฟังก์ชันจำลอง API - ดึงข้อมูลจาก JSON
+  const fetchPaymentData = async (roomId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log(`🔄 กำลังดึงข้อมูลห้อง: ${roomId}`);
+      
+      // จำลอง network delay (1-2 วินาที)
+      // await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      
+      // จำลอง network error บางครั้ง (5% โอกาส)
+      if (Math.random() < 0.05) {
+        throw new Error('Network timeout - กรุณาลองใหม่');
+      }
+      
+      // ค้นหาข้อมูลจาก PaymentData
+      const room = PaymentData.rooms.find(r => r.RoomID === roomId);
+      
+      if (!room) {
+        throw new Error(`ไม่พบข้อมูลห้อง ${roomId}`);
+      }
+      
+      if (!room.Payment || !room.Payment.quotation) {
+        throw new Error('ไม่พบข้อมูลใบเสนอราคาในห้องนี้');
+      }
+      
+      // จำลอง API response
+      console.log(`✅ ดึงข้อมูลสำเร็จ: ${room.Payment.quotation.productName}`);
+      setQuotationData(room.Payment.quotation);
+      
+    } catch (error) {
+      console.error('❌ Error fetching payment data:', error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (roomId) {
+      fetchPaymentData(roomId);
+    } else {
+      setError('ไม่มี roomId');
+      setLoading(false);
+    }
+  }, [roomId]);
 
   const handlePaymentSelect = (method) => {
     setSelectedPayment(method);
@@ -36,6 +79,11 @@ export default function PaymentPage({ navigation, route }) {
   const handleFinalPayment = () => {
     if (!selectedPayment) {
       Alert.alert("แจ้งเตือน", "กรุณาเลือกวิธีการชำระเงิน");
+      return;
+    }
+
+    if (!quotationData) {
+      Alert.alert("แจ้งเตือน", "ไม่พบข้อมูลใบเสนอราคา");
       return;
     }
 
@@ -52,13 +100,56 @@ export default function PaymentPage({ navigation, route }) {
     setConfirmModalVisible(true);
   };
 
-  const handleConfirmPayment = () => {
-    
-    setConfirmModalVisible(false);
-    
-    navigation.goBack()
+const handleConfirmPayment = async () => {
 
-  };
+  // try {
+  
+  //   const res = await fetch("http://localhost:5000/api/payment/confirm", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ roomId })
+  //   });
+
+  //   const result = await res.json();
+  //   console.log("💰 Updated quotation:", result);
+
+  //   setConfirmModalVisible(false);
+  //   navigation.goBack();
+
+  // } catch (err) {
+  //   console.error("Payment confirm error:", err);
+  // }
+
+  setConfirmModalVisible(false);
+  navigation.goBack();
+
+};
+  
+
+  // แสดง loading หรือ error
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+        <Text className="text-gray-600 mb-2">กำลังโหลดข้อมูล...</Text>
+        <Text className="text-gray-500 text-sm">Room ID: {roomId}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !quotationData) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+        <Text className="text-red-600 mb-2">เกิดข้อผิดพลาด</Text>
+        <Text className="text-gray-500 text-sm mb-4">{error || 'ไม่พบข้อมูล'}</Text>
+        <TouchableOpacity 
+          className="bg-blue-500 px-4 py-2 rounded-lg"
+          onPress={() => roomId && fetchPaymentData(roomId)}
+        >
+          <Text className="text-white">ลองใหม่</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={["top", "bottom"]}>
@@ -84,8 +175,14 @@ export default function PaymentPage({ navigation, route }) {
           </Text>
           <View className="flex-row">
             <View className="w-20 h-20 bg-gray-200 rounded-lg mr-3">
+              {/* TODO: แสดงรูปสินค้าจาก quotationData.images */}
+              {/* <Image 
+                source={{ uri: quotationData.images }} 
+                className="w-full h-full rounded-lg"
+                resizeMode="cover"
+              /> */}
               <Text className="text-gray-500 text-center leading-20">
-                  {/*  */}
+                รูป
               </Text>
             </View>
             <View className="flex-1">
@@ -108,13 +205,10 @@ export default function PaymentPage({ navigation, route }) {
             เลือกวิธีการชำระเงิน
           </Text>
 
-          {/* เครดิต */}
-
+          {/* เครดิต - คอมเมนต์ไว้เพราะยังไม่ได้ทำระบบเครดิต */}
           <View
-
             // onPress={() => {handlePaymentSelect("credit"); setQrcode(false);}}
-
-            className={`flex-row items-center p-4 mb-3 rounded-lg border-2 bg-gray-200 ${
+            className={`flex-row items-center p-4 mb-3 rounded-lg border-2  bg-gray-200 ${
               selectedPayment === "credit"
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-200"
@@ -140,7 +234,7 @@ export default function PaymentPage({ navigation, route }) {
             />
           </View>
 
-          {/* ช่องกรอกจำนวนเครดิต (แสดงเมื่อเลือกเครดิต) */}
+          {/* ช่องกรอกจำนวนเครดิต */}
           {selectedPayment === "credit" && (
             <View className="bg-blue-50 p-4 mb-3 rounded-lg border border-blue-200">
               <Text className="text-gray-700 mb-2">
@@ -156,7 +250,7 @@ export default function PaymentPage({ navigation, route }) {
             </View>
           )}
 
-          {/* โอนเงิน */}
+          {/* โอนเงิน - คอมเมนต์ไว้เพราะยังไม่ได้เชื่อมต่อธนาคาร */}
           <View
             // onPress={() => {handlePaymentSelect("transfer"); setQrcode(false);}}
             className={`flex-row items-center p-4 mb-3 rounded-lg border-2 bg-gray-200 ${
@@ -169,19 +263,19 @@ export default function PaymentPage({ navigation, route }) {
               <Ionicons name="card" size={24} color="#22C55E" />
             </View>
             <View className="flex-1">
-              <Text className="font-semibold text-gray-800"> โอนเงินผ่านธนาคาร </Text>
-              <Text className="text-gray-600 text-sm"> โอนเงินเข้าบัญชีบริษัท </Text>
-
+              <Text className="font-semibold text-gray-800">โอนเงินผ่านธนาคาร</Text>
+              <Text className="text-gray-600 text-sm">โอนเงินเข้าบัญชีบริษัท</Text>
             </View>
-            <Ionicons name={ selectedPayment === "transfer" ? "radio-button-on" : "radio-button-off"} size={20}
+            <Ionicons 
+              name={selectedPayment === "transfer" ? "radio-button-on" : "radio-button-off"} 
+              size={20}
               color={selectedPayment === "transfer" ? "#3B82F6" : "#9CA3AF"}
             />
           </View>
 
-          {/* พร้อมเพย์ */}
+          {/* พร้อมเพย์ - ใช้ได้ */}
           <TouchableOpacity
-            onPress={() => { handlePaymentSelect("promptpay"); setQrcode(true);
-            }}
+            onPress={() => {handlePaymentSelect("promptpay"); setQrcode(true);}}
             className={`flex-row items-center p-4 rounded-lg border-2 ${
               selectedPayment === "promptpay"
                 ? "border-blue-500 bg-blue-50"
@@ -198,7 +292,7 @@ export default function PaymentPage({ navigation, route }) {
               </Text>
             </View>
             <Ionicons
-              name={ selectedPayment === "promptpay" ? "radio-button-on" : "radio-button-off"}
+              name={selectedPayment === "promptpay" ? "radio-button-on" : "radio-button-off"}
               size={20}
               color={selectedPayment === "promptpay" ? "#3B82F6" : "#9CA3AF"}
             />
@@ -216,7 +310,7 @@ export default function PaymentPage({ navigation, route }) {
           </View>
           <View className="flex-row justify-between mb-2">
             <Text className="text-gray-600">ค่าธรรมเนียม</Text>
-            <Text className="text-gray-800 fontse">฿50</Text>
+            <Text className="text-gray-800">฿50</Text>
           </View>
           <View className="border-t border-gray-200 pt-2">
             <View className="flex-row justify-between">
@@ -253,16 +347,18 @@ export default function PaymentPage({ navigation, route }) {
                   ยืนยันการชำระเงิน
                 </Text>
 
-                <View className="w-full h-[40vh] mb-4  flex justify-center items-center">
-                    <Image
+                <View className="w-full h-[40vh] mb-4 flex justify-center items-center">
+                  {/* TODO: สร้าง QR Code จริงจาก API */}
+                  <Image
                     source={require("../assets/Qrcode.jpg")}
-                    className="w-full h-full "
+                    className="w-full h-full"
                   />
+                  {/* <Text className="text-gray-500">QR Code จะแสดงที่นี่</Text> */}
                 </View>
 
-                <View className="flex-row justify-between ">
+                <View className="flex-row justify-between">
                   <TouchableOpacity
-                    className="bg-gray-300 px-6 py-3 rounded-lg flex-1 "
+                    className="bg-gray-300 px-6 py-3 rounded-lg flex-1"
                     onPress={() => setConfirmModalVisible(false)}
                   >
                     <Text className="text-gray-700 text-center font-semibold">
@@ -298,13 +394,15 @@ export default function PaymentPage({ navigation, route }) {
                       : "พร้อมเพย์"}
                 </Text>
                 <View className="flex-row justify-between">
-                  <TouchableOpacity className="bg-gray-300 px-6 py-3 rounded-lg flex-1 mr-2"
+                  <TouchableOpacity 
+                    className="bg-gray-300 px-6 py-3 rounded-lg flex-1 mr-2"
                     onPress={() => setConfirmModalVisible(false)}
                   >
-                    <Text className="text-gray-700 text-center font-semibold"> ยกเลิก </Text>
+                    <Text className="text-gray-700 text-center font-semibold">ยกเลิก</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity className="bg-blue-500 px-6 py-3 rounded-lg flex-1 ml-2"
+                  <TouchableOpacity 
+                    className="bg-blue-500 px-6 py-3 rounded-lg flex-1 ml-2"
                     onPress={handleConfirmPayment}
                   >
                     <Text className="text-white text-center font-semibold">ยืนยัน</Text>

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Text,
   View,
@@ -12,36 +12,26 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-  import { SafeAreaView } from "react-native-safe-area-context";
-  import * as ImagePicker from "expo-image-picker";
-  import ChatData from "../chat.json";
-  import { Ionicons } from "@expo/vector-icons";
-  import { Clipboard } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+import ChatData from "../chat.json";
+import { Ionicons } from "@expo/vector-icons";
+import { Clipboard } from 'react-native';
 
 export default function RoomPage({navigation , route}) {
 
-  /** ==============================
-   * 1️⃣ กำหนดผู้ใช้ปัจจุบันและห้องแชท
-   ===============================*/
+  const currentUserId = "205";
 
-  const currentUserId = "101";
-  
-  const { Idroom  } = route.params || {};
-
-  const roomId = Idroom  ? Idroom .toString() : "";
-
+  const { Idroom } = route.params || {};
+  const roomId = Idroom ? Idroom.toString() : "";
   const room = ChatData.rooms.find((r) => r.RoomID === roomId);
 
   if (!room) return <Text>Room not found</Text>;
 
   const RoomIdname  = room.RoomID;
-
   const currentUser = room.users[currentUserId];
   const currentUserRole = currentUser?.role || "buyer";
 
-  /** ==============================
-   * 2️⃣ สร้าง state ของข้อความและ input
-   ===============================*/
   const initialMessages = Object.entries(room.messages).map(([id, msg]) => ({
     id,
     ...msg,
@@ -50,9 +40,6 @@ export default function RoomPage({navigation , route}) {
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef(null);
 
-  /** ==============================
-   * 3️⃣ Modal & Quotation State
-   ===============================*/
   const [modalVisible, setModalVisible] = useState(false);
   const [quotationData, setQuotationData] = useState({
     productName: "",
@@ -61,19 +48,12 @@ export default function RoomPage({navigation , route}) {
     price: "",
   });
 
-  /** ==============================
-   * 4️⃣ Modal & Tracking State
-   ===============================*/
   const [trackingModalVisible, setTrackingModalVisible] = useState(false);
   const [trackingNumber, setTrackingNumber] = useState("");
 
-  /** ==============================
-   * 5️⃣ ฟังก์ชันจัดการข้อความ
-   ===============================*/
   const handleTextChange = useCallback((text) => setInputText(text), []);
 
   const sendMessage = () => {
-
     if (inputText.trim() === "") return;
     const newMsg = {
       id: Date.now().toString(),
@@ -95,19 +75,11 @@ export default function RoomPage({navigation , route}) {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 300);
   };
 
-
   const handleCopy = () => {
-    const textToCopy = RoomIdname; // เปลี่ยนเป็นข้อความที่ต้องการ
-      Clipboard.setString(textToCopy);
+    Clipboard.setString(RoomIdname);
   };
 
-
-  /** ==============================
-   * 6️⃣ ใบเสนอราคา - ตรวจสอบที่ยังไม่ชำระ (สำหรับผู้ซื้อ)
-   ===============================*/
-
   const pendingQuotations = messages.filter(
-
     (msg) =>
       msg.type === "quotation" &&
       msg.sender_id !== currentUserId &&
@@ -119,17 +91,13 @@ export default function RoomPage({navigation , route}) {
     (msg) => msg.type === "quotation" && msg.sender_id === currentUserId
   );
 
-  /** ==============================
-   * 7️⃣ ฟังก์ชันเลือกภาพใบเสนอราคา
-   ===============================*/
   const pickImage = async () => {
-
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") return alert("ต้องอนุญาตเข้าถึงรูปภาพ");
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.7,
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
     });
     if (!result.canceled) {
       const uri = result.assets[0].uri;
@@ -140,9 +108,6 @@ export default function RoomPage({navigation , route}) {
     }
   };
 
-  /** ==============================
-   * 8️⃣ ส่งใบเสนอราคา
-   ===============================*/
   const sendQuotation = () => {
     if (!quotationData.productName || !quotationData.price) {
       return alert("กรุณากรอกชื่อสินค้าและราคา");
@@ -159,11 +124,7 @@ export default function RoomPage({navigation , route}) {
     setModalVisible(false);
   };
 
-  /** ==============================
-   * 9️⃣ ชำระเงินใบเสนอราคา (ผู้ซื้อ)
-   ===============================*/
   const handlePayQuotation = (quotationId) => {
-
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === quotationId
@@ -172,11 +133,8 @@ export default function RoomPage({navigation , route}) {
       )
     );
 
-    navigation.navigate("PaymentPage", { 
-      roomId: roomId 
-    });
+    navigation.navigate("PaymentPage", { roomId: roomId });
 
-    
     const paidMsg = {
       id: (Date.now() + 1).toString(),
       type: "system",
@@ -185,12 +143,8 @@ export default function RoomPage({navigation , route}) {
       receiver: "admin",
     };
     setMessages((prev) => [...prev, paidMsg]);
-
   };
 
-  /** ==============================
-   * 🔟 กรอกเลขขนส่ง (ผู้ขาย)
-   ===============================*/
   const handleSendTrackingNumber = () => {
     if (!trackingNumber) return alert("กรุณากรอกเลขขนส่ง");
     const systemMsg = {
@@ -204,24 +158,20 @@ export default function RoomPage({navigation , route}) {
     setTrackingModalVisible(false);
   };
 
-  /** ==============================
-   * 1️⃣1️⃣ Render หน้าจอ
-   ===============================*/
   return (
     <SafeAreaView className="flex-1 bg-gray-50" edges={["top", "bottom"]}>
-      
       <StatusBar barStyle="light-content" backgroundColor="#3B82F6" />
 
       {/* Header */}
       <View className="bg-blue-500 shadow-sm">
         <View className="flex-row items-center justify-between px-4 py-3">
           <View className="flex-row items-center justify-between  w-full">
-              <TouchableOpacity 
-                onPress={() => navigation.navigate("Home")} 
-                className="w-10 h-10 bg-blue-400 rounded-full items-center justify-center mr-3"
-              >
-                <Ionicons name="arrow-back" size={24} color="white" />
-              </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate("Home")} 
+              className="w-10 h-10 bg-blue-400 rounded-full items-center justify-center mr-3"
+            >
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
             <Text className="text-white font-semibold text-lg">หมายเลขห้อง : {RoomIdname}</Text>
             <TouchableOpacity onPress={handleCopy} className="text-white font-semibold text-lg">
               <Text className="font-semibold text-white border-b-2 border-white/50">คัดลอก</Text>
@@ -307,7 +257,6 @@ export default function RoomPage({navigation , route}) {
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}>
           <View className="bg-white border-t border-gray-200 px-4 py-3">
             <View className="flex-row items-end space-x-2 gap-3">
-              {/* ปุ่มส่งใบเสนอราคาสำหรับผู้ขาย */}
               {currentUserRole === "seller" && !hasSentQuotation && (
                 <TouchableOpacity className="px-3 py-2 rounded-full bg-green-500" onPress={() => setModalVisible(true)}>
                   <Text className="text-white py-1 font-semibold">ส่งใบเสนอราคา</Text>
@@ -336,6 +285,7 @@ export default function RoomPage({navigation , route}) {
 
         {/* Floating Button สำหรับผู้ขายกรอกเลขขนส่ง */}
         {currentUserRole === "seller" &&
+          !messages.some((msg) => msg.type === "system" && msg.text.startsWith("ผู้ขายได้กรอกเลขขนส่ง")) &&
           messages.some((msg) => msg.type === "quotation" && msg.quotation.status) && (
             <TouchableOpacity
               className="absolute bottom-24 right-4 bg-blue-500 w-16 h-16 rounded-full items-center justify-center shadow-lg"
@@ -343,7 +293,7 @@ export default function RoomPage({navigation , route}) {
             >
               <Text className="text-white font-bold text-lg">🚚</Text>
             </TouchableOpacity>
-          )}
+        )}
 
         {/* Quotation Modal */}
         <Modal visible={modalVisible} transparent animationType="slide">
