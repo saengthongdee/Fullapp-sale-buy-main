@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import PaymentData from '../Payment.json';
 
 export default function PaymentPage({ navigation, route }) {
+  
   const { roomId } = route.params || {};
 
   const [selectedPayment, setSelectedPayment] = useState("");
@@ -26,21 +27,13 @@ export default function PaymentPage({ navigation, route }) {
 
   // ฟังก์ชันจำลอง API - ดึงข้อมูลจาก JSON
   const fetchPaymentData = async (roomId) => {
+
     try {
       setLoading(true);
       setError(null);
       
       console.log(`🔄 กำลังดึงข้อมูลห้อง: ${roomId}`);
       
-      // จำลอง network delay (1-2 วินาที)
-      // await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-      
-      // จำลอง network error บางครั้ง (5% โอกาส)
-      if (Math.random() < 0.05) {
-        throw new Error('Network timeout - กรุณาลองใหม่');
-      }
-      
-      // ค้นหาข้อมูลจาก PaymentData
       const room = PaymentData.rooms.find(r => r.RoomID === roomId);
       
       if (!room) {
@@ -51,7 +44,6 @@ export default function PaymentPage({ navigation, route }) {
         throw new Error('ไม่พบข้อมูลใบเสนอราคาในห้องนี้');
       }
       
-      // จำลอง API response
       console.log(`✅ ดึงข้อมูลสำเร็จ: ${room.Payment.quotation.productName}`);
       setQuotationData(room.Payment.quotation);
       

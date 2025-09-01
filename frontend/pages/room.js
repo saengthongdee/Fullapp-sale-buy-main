@@ -12,6 +12,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import ChatData from "../chat.json";
@@ -20,7 +21,7 @@ import { Clipboard } from 'react-native';
 
 export default function RoomPage({navigation , route}) {
 
-  const currentUserId = "205";
+  const currentUserId = "101";
 
   const { Idroom } = route.params || {};
   const roomId = Idroom ? Idroom.toString() : "";
@@ -32,15 +33,14 @@ export default function RoomPage({navigation , route}) {
   const currentUser = room.users[currentUserId];
   const currentUserRole = currentUser?.role || "buyer";
 
-  const initialMessages = Object.entries(room.messages).map(([id, msg]) => ({
-    id,
-    ...msg,
-  }));
+  const initialMessages = Object.entries(room.messages).map(([id, msg]) => ({ id, ...msg,}));
+
   const [messages, setMessages] = useState(initialMessages);
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef(null);
 
   const [modalVisible, setModalVisible] = useState(false);
+
   const [quotationData, setQuotationData] = useState({
     productName: "",
     details: "",
@@ -54,13 +54,16 @@ export default function RoomPage({navigation , route}) {
   const handleTextChange = useCallback((text) => setInputText(text), []);
 
   const sendMessage = () => {
+
     if (inputText.trim() === "") return;
+
     const newMsg = {
       id: Date.now().toString(),
       sender_id: currentUserId,
       text: inputText,
       timestamp: Math.floor(Date.now() / 1000),
     };
+
     setMessages([...messages, newMsg]);
     setInputText("");
   };
@@ -80,18 +83,27 @@ export default function RoomPage({navigation , route}) {
   };
 
   const pendingQuotations = messages.filter(
-    (msg) =>
-      msg.type === "quotation" &&
-      msg.sender_id !== currentUserId &&
-      currentUserRole === "buyer" &&
-      msg.quotation.status === false
+
+    (msg) => msg.type === "quotation" && msg.sender_id !== currentUserId && currentUserRole === "buyer" && msg.quotation.status === false
+
   );
 
   const hasSentQuotation = messages.some(
     (msg) => msg.type === "quotation" && msg.sender_id === currentUserId
   );
 
+  // ตรวจสอบว่าผู้ขายส่งเลขขนส่งแล้วหรือยัง
+  const hasTrackingNumber = messages.some(
+    (msg) => msg.type === "system" && msg.text.startsWith("ผู้ขายได้กรอกเลขขนส่ง")
+  );
+
+  // ตรวจสอบว่าผู้ซื้อยืนยันการได้รับของแล้วหรือยัง
+  const hasConfirmedDelivery = messages.some(
+    (msg) => msg.type === "system" && msg.text.startsWith("ผู้ซื้อยืนยันการได้รับของแล้ว")
+  );
+
   const pickImage = async () => {
+
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") return alert("ต้องอนุญาตเข้าถึงรูปภาพ");
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -99,6 +111,7 @@ export default function RoomPage({navigation , route}) {
       allowsEditing: true,
       quality: 0.7,
     });
+
     if (!result.canceled) {
       const uri = result.assets[0].uri;
       setQuotationData({
@@ -109,9 +122,11 @@ export default function RoomPage({navigation , route}) {
   };
 
   const sendQuotation = () => {
+
     if (!quotationData.productName || !quotationData.price) {
       return alert("กรุณากรอกชื่อสินค้าและราคา");
     }
+
     const newQuotation = {
       id: Date.now().toString(),
       sender_id: currentUserId,
@@ -119,12 +134,14 @@ export default function RoomPage({navigation , route}) {
       quotation: { ...quotationData, status: false },
       timestamp: Math.floor(Date.now() / 1000),
     };
+
     setMessages([...messages, newQuotation]);
     setQuotationData({ productName: "", details: "", images: "", price: "" });
     setModalVisible(false);
   };
 
   const handlePayQuotation = (quotationId) => {
+
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === quotationId
@@ -140,22 +157,38 @@ export default function RoomPage({navigation , route}) {
       type: "system",
       text: "ชำระเงินเสร็จสิ้น สามารถส่งของได้เลยครับ",
       timestamp: Math.floor(Date.now() / 1000),
-      receiver: "admin",
     };
     setMessages((prev) => [...prev, paidMsg]);
   };
 
   const handleSendTrackingNumber = () => {
+
     if (!trackingNumber) return alert("กรุณากรอกเลขขนส่ง");
+
     const systemMsg = {
+
       id: Date.now().toString(),
       type: "system",
       text: `ผู้ขายได้กรอกเลขขนส่ง: ${trackingNumber}`,
       timestamp: Math.floor(Date.now() / 1000),
+
     };
+
     setMessages((prev) => [...prev, systemMsg]);
     setTrackingNumber("");
     setTrackingModalVisible(false);
+  };
+
+  // ฟังก์ชันสำหรับยืนยันการได้รับของ
+  const handleConfirmDelivery = () => {
+    const confirmMsg = {
+      id: Date.now().toString(),
+      type: "system",
+      text: "ผู้ซื้อยืนยันการได้รับของแล้ว การซื้อขายเสร็จสมบูรณ์",
+      timestamp: Math.floor(Date.now() / 1000),
+    };
+
+    setMessages((prev) => [...prev, confirmMsg]);
   };
 
   return (
@@ -241,11 +274,8 @@ export default function RoomPage({navigation , route}) {
         {/* ปุ่มชำระเงินสำหรับผู้ซื้อ */}
         {pendingQuotations.map((msg) => (
           <View key={msg.id} className="flex-row px-9 mb-2 gap-2 justify-between items-center">
-            <TouchableOpacity className="w-1/2 bg-yellow-500 py-3 rounded-lg items-center justify-center shadow">
-              <Text className="text-white font-semibold text-center">ใช้เครดิต</Text>
-            </TouchableOpacity>
             <TouchableOpacity
-              className="w-1/2 bg-green-500 py-3 rounded-lg items-center justify-center shadow"
+              className="w-full bg-green-500 py-3 rounded-lg items-center justify-center shadow"
               onPress={() => handlePayQuotation(msg.id)}
             >
               <Text className="text-white font-semibold text-center">ชำระเงิน</Text>
@@ -283,16 +313,39 @@ export default function RoomPage({navigation , route}) {
           </View>
         </KeyboardAvoidingView>
 
-        {/* Floating Button สำหรับผู้ขายกรอกเลขขนส่ง */}
+        {/* ปุ่มกรอกเลขขนส่งสำหรับผู้ขาย */}
         {currentUserRole === "seller" &&
-          !messages.some((msg) => msg.type === "system" && msg.text.startsWith("ผู้ขายได้กรอกเลขขนส่ง")) &&
+          !hasTrackingNumber &&
           messages.some((msg) => msg.type === "quotation" && msg.quotation.status) && (
-            <TouchableOpacity
-              className="absolute bottom-24 right-4 bg-blue-500 w-16 h-16 rounded-full items-center justify-center shadow-lg"
-              onPress={() => setTrackingModalVisible(true)}
-            >
-              <Text className="text-white font-bold text-lg">🚚</Text>
-            </TouchableOpacity>
+            <View className="flex-row px-9 absolute bottom-20 mb-2 gap-2 justify-between items-center">
+              <TouchableOpacity
+                className="w-full bg-blue-500 py-3 rounded-lg items-center justify-center shadow"
+                onPress={() => setTrackingModalVisible(true)}
+              >
+                <Text className="text-white font-semibold text-center">กรอกเลขขนส่ง</Text>
+              </TouchableOpacity>
+            </View>
+        )}
+
+        {/* ปุ่มยืนยันการได้รับของสำหรับผู้ซื้อ */}
+        {currentUserRole === "buyer" &&
+          hasTrackingNumber &&
+          !hasConfirmedDelivery && (
+            <View className="flex-row px-9 mb-2 gap-2  absolute bottom-20 justify-between mr-4 items-center">
+              <TouchableOpacity
+                className="w-1/2 bg-gray-500 py-3 rounded-lg items-center justify-center shadow"
+                
+              >
+                <Text className="text-white font-semibold text-center">คืนสินค้า</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="w-1/2 bg-green-500 py-3 rounded-lg items-center justify-center shadow"
+                onPress={handleConfirmDelivery}
+              >
+                <Text className="text-white font-semibold text-center">ได้รับของแล้ว</Text>
+              </TouchableOpacity>
+            </View>
         )}
 
         {/* Quotation Modal */}

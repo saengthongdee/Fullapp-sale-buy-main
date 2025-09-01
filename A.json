@@ -1,0 +1,59 @@
+{
+  "roomId": "64f91b5d2e3c45a1a9d5b001",
+  "orderId": "64f91b5d2e3c45a1a9d5b002",
+  
+  "participants": [
+    {
+      "userId": "64f91b5d2e3c45a1a9d5c101",
+      "role": "buyer",
+      "username": "สมชาย",
+      "lastReadAt": "2025-09-01T12:01:30.000Z"
+    },
+    {
+      "userId": "64f91b5d2e3c45a1a9d5c102",
+      "role": "seller",
+      "username": "สมหญิง",
+      "lastReadAt": "2025-09-01T12:02:15.000Z"
+    }
+  ],
+  "messages": [
+    {
+      "messageId": "64f91b5d2e3c45a1a9d5m001",
+      "senderId": "64f91b5d2e3c45a1a9d5c101",
+      "role": "buyer",
+      "type": "text",
+      "body": "สวัสดีครับ สนใจสินค้าชิ้นนี้",
+      "createdAt": "2025-09-01T12:00:00.000Z",
+      "editedAt": null,
+      "deletedAt": null
+    },
+    {
+      "messageId": "64f91b5d2e3c45a1a9d5m002",
+      "senderId": "64f91b5d2e3c45a1a9d5c102",
+      "role": "seller",
+      "type": "text",
+      "body": "ได้เลยค่ะ ราคาตามที่ประกาศ 12,900 บาท",
+      "createdAt": "2025-09-01T12:00:45.000Z",
+      "editedAt": null,
+      "deletedAt": null
+    },
+    {
+      "messageId": "64f91b5d2e3c45a1a9d5m003",
+      "senderId": "64f91b5d2e3c45a1a9d5c101",
+      "role": "buyer",
+      "type": "file",
+      "body": "นี่เป็นสลิปโอนเงินครับ",
+      "attachments": [
+        {
+          "url": "https://s3.amazonaws.com/bucket/slip123.jpg",
+          "kind": "image",
+          "size": 245678,
+          "name": "slip.jpg"
+        }
+      ],
+      "createdAt": "2025-09-01T12:01:20.000Z",
+      "editedAt": null,
+      "deletedAt": null
+    }
+  ]
+}
