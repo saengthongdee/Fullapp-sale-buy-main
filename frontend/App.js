@@ -24,6 +24,7 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginPage} />
         <Stack.Screen name="Home" component={Homepage} />
         <Stack.Screen name="Room" component={RoomPage} />
+
         <Stack.Screen 
             name="PaymentPage" 
             component={PaymentPage} 
