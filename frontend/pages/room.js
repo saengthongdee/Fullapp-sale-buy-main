@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   Text,
   View,
@@ -21,10 +21,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { Clipboard } from "react-native";
 
 export default function RoomPage({ navigation, route }) {
-  const currentUserId = "101";
-  const { Idroom } = route.params || {};
-  const roomId = Idroom ? Idroom.toString() : "";
+
+  const { userId, Idroom ,room_number } = route.params || {};
+
+
+  const currentUserId = userId; 
+
+  const roomId = Idroom ? Idroom.toString() : room_number ? room_number.toString() : "";
+
   const room = ChatData.rooms.find((r) => r.RoomID === roomId);
+  
   if (!room) return <Text>Room not found</Text>;
 
   const RoomIdname = room.RoomID;
@@ -65,7 +71,11 @@ export default function RoomPage({ navigation, route }) {
 
     setMessages([...messages, newMsg]);
     setInputText("");
-    Keyboard.dismiss();
+    
+    // Scroll to end after message is sent
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 50);
   };
 
   const formatTime = (timestamp) =>
@@ -75,7 +85,9 @@ export default function RoomPage({ navigation, route }) {
     });
 
   const handleInputFocus = () => {
-    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 300);
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 300);
   };
 
   const handleCopy = () => {
@@ -109,15 +121,13 @@ export default function RoomPage({ navigation, route }) {
       msg.text?.startsWith("ผู้ซื้อยืนยันการได้รับของแล้ว")
   );
 
-  // เพิ่มบรรทัดนี้ก่อน return
-const paidQuotations = messages.filter(
-  (msg) =>
-    msg.type === "quotation" &&
-    msg.quotation.status === true
-);
+  const paidQuotations = messages.filter(
+    (msg) =>
+      msg.type === "quotation" &&
+      msg.quotation.status === true
+  );
 
-const showTrackingButton = currentUserRole === "seller" && paidQuotations.length > 0 && !hasTracking;
-
+  const showTrackingButton = currentUserRole === "seller" && paidQuotations.length > 0 && !hasTracking;
 
   // รูปภาพใบเสนอราคา
   const pickImage = async () => {
@@ -215,7 +225,7 @@ const showTrackingButton = currentUserRole === "seller" && paidQuotations.length
         <View className="flex-row items-center justify-between px-4 py-3">
           <View className="flex-row items-center justify-between w-full">
             <TouchableOpacity
-              onPress={() => navigation.navigate("Home")}
+              onPress={() => navigation.goBack()}
               className="w-10 h-10 bg-blue-400 rounded-full items-center justify-center mr-3"
             >
               <Ionicons name="arrow-back" size={24} color="white" />
@@ -230,249 +240,265 @@ const showTrackingButton = currentUserRole === "seller" && paidQuotations.length
         </View>
       </View>
 
-      {/* Chat */}
-      <View className="flex-1">
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          className="flex-1 bg-gray-50"
-          contentContainerStyle={{ padding: 16, paddingBottom: 20 }}
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={() =>
-            setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50)
-          }
-          renderItem={({ item }) => {
-            const isQuotation = item.type === "quotation";
-            const isCurrentUser = item.sender_id === currentUserId;
-            const isSystemMsg = item.type === "system";
+      {/* Main Container with proper KeyboardAvoidingView */}
+      <KeyboardAvoidingView 
+        className="flex-1" 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}
+      >
+        {/* Chat */}
+        <View className="flex-1">
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            className="flex-1 bg-gray-50"
+            contentContainerStyle={{ 
+              padding: 16, 
+              paddingBottom: 20
+            }}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={() =>
+              setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50)
+            }
+            keyboardShouldPersistTaps="handled"
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 10,
+            }}
+            renderItem={({ item }) => {
 
-            return (
-              <View className={`mb-3 ${isSystemMsg ? "items-center" : isCurrentUser ? "items-end" : "items-start"}`}>
-                <View
-                  className={`px-6 py-3 rounded-2xl max-w-[100%] shadow-sm ${
-                    isSystemMsg
-                      ? "bg-green-100 rounded-lg"
-                      : isQuotation
-                      ? "bg-white border border-black/10"
-                      : isCurrentUser
-                      ? "bg-blue-500 rounded-br-md"
-                      : "bg-white border border-gray-200 rounded-bl-md"
-                  }`}
-                >
-                  {isSystemMsg ? (
-                    <Text className="text-gray-500 font-semibold">{item.text || ""}</Text>
-                  ) : isQuotation ? (
-                    <View className="w-60 flex gap-4">
-                      <Text className="font-semibold text-black/60">ใบเสนอราคา</Text>
-                      <Text className="text-gray-500">{item.quotation.productName || ""}</Text>
-                      <View className="flex flex-row justify-between border-t border-b border-black/20 py-4 text-gray-500 text-sm">
-                        <Text className="font-semibold text-black/60">ราคารวมสุทธิ</Text>
-                        <Text className="font-semibold text-black/60">฿ {item.quotation.price || ""}</Text>
+              const isQuotation = item.type === "quotation";
+              const isCurrentUser = item.sender_id === currentUserId;
+              const isSystemMsg = item.type === "system";
+
+              return (
+                <View className={`mb-3 ${isSystemMsg ? "items-center" : isCurrentUser ? "items-end" : "items-start"}`}>
+                  <View
+                    className={`px-6 py-3 rounded-2xl max-w-[100%] shadow-sm ${
+                      isSystemMsg
+                        ? "bg-green-100 rounded-lg"
+                        : isQuotation
+                        ? "bg-white border border-black/10"
+                        : isCurrentUser
+                        ? "bg-blue-500 rounded-br-md"
+                        : "bg-white border border-gray-200 rounded-bl-md"
+                    }`}
+                  >
+                    {isSystemMsg ? (
+                      <Text className="text-gray-500 font-semibold">{item.text || ""}</Text>
+                    ) : isQuotation ? (
+                      <View className="w-60 flex gap-4">
+                        <Text className="font-semibold text-black/60">ใบเสนอราคา</Text>
+                        <Text className="text-gray-500">{item.quotation.productName || ""}</Text>
+                        <View className="flex flex-row justify-between border-t border-b border-black/20 py-4 text-gray-500 text-sm">
+                          <Text className="font-semibold text-black/60">ราคารวมสุทธิ</Text>
+                          <Text className="font-semibold text-black/60">฿ {item.quotation.price || ""}</Text>
+                        </View>
+                        <View className="flex flex-row justify-between py-2">
+                          <Text className="font-semibold text-blue-500">ดูฉบับเต็ม</Text>
+                          <Text className="font-semibold text-blue-500">ดาวโหลด</Text>
+                        </View>
                       </View>
-                      <View className="flex flex-row justify-between py-2">
-                        <Text className="font-semibold text-blue-500">ดูฉบับเต็ม</Text>
-                        <Text className="font-semibold text-blue-500">ดาวโหลด</Text>
-                      </View>
-                    </View>
-                  ) : (
-                    <Text className={`text-base ${isCurrentUser ? "text-white" : "text-gray-800"}`}>
-                      {item.text || ""}
+                    ) : (
+                      <Text className={`text-base ${isCurrentUser ? "text-white" : "text-gray-800"}`}>
+                        {item.text || ""}
+                      </Text>
+                    )}
+                  </View>
+                  {!isSystemMsg && (
+                    <Text className={`text-xs text-gray-400 mt-1 ${isCurrentUser ? "text-right" : "text-left"}`}>
+                      {formatTime(item.timestamp)}
                     </Text>
                   )}
                 </View>
-                {!isSystemMsg && (
-                  <Text className={`text-xs text-gray-400 mt-1 ${isCurrentUser ? "text-right" : "text-left"}`}>
-                    {formatTime(item.timestamp)}
-                  </Text>
-                )}
-              </View>
-            );
-          }}
-        />
+              );
+            }}
+          />
 
-        {/* ปุ่มชำระเงิน */}
-        {pendingQuotations.map((msg) => (
-          <View key={msg.id} className="flex-row px-9 mb-2 gap-2 justify-between items-center">
-            <TouchableOpacity
-              className="w-full bg-green-500 py-3 rounded-lg items-center justify-center shadow"
-              onPress={() => handlePayQuotation(msg.id)}
+          {/* ปุ่มชำระเงิน */}
+          {pendingQuotations.map((msg) => (
+            <View key={msg.id} className="flex-row px-9 mb-2 gap-2 justify-between items-center">
+              <TouchableOpacity
+                className="w-full bg-green-500 py-3 rounded-lg items-center justify-center shadow"
+                onPress={() => handlePayQuotation(msg.id)}
+              >
+                <Text className="text-white font-semibold text-center">ชำระเงิน</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+
+          {/* ปุ่มผู้ซื้อ: ยืนยัน / ยกเลิก */}
+          {showDeliveryButton && (
+            <View className="px-6 py-2 flex-row justify-center gap-3">
+              <TouchableOpacity
+                className="w-1/2 bg-red-400 py-3 border border-black/50 px-4 rounded-lg items-center justify-center"
+                onPress={() => alert("ยกเลิกสินค้าเรียบร้อย")}
+              >
+                <Text className="text-white font-semibold">ยกเลิกสินค้า</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="w-1/2 bg-green-400 py-3 px-4 border border-black/50 rounded-lg items-center justify-center"
+                onPress={handleConfirmDelivery}
+              >
+                <Text className="text-white font-semibold">ยืนยันได้รับสินค้า</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* Input Area */}
+        <View className="bg-white border-t border-gray-200 px-4 py-3">
+          <View className="flex-row items-end space-x-2 gap-3">
+            {currentUserRole === "seller" && !hasSentQuotation && (
+              <TouchableOpacity className="px-3 py-2 rounded-full bg-green-500" onPress={() => setModalVisible(true)}>
+                <Text className="text-white py-1 font-semibold">ส่งใบเสนอราคา</Text>
+              </TouchableOpacity>
+            )}
+            <View className="flex-1 bg-gray-100 rounded-3xl px-4 max-h-24">
+              <TextInput
+                className="text-base text-gray-800 py-3"
+                placeholder="พิมพ์ข้อความ..."
+                placeholderTextColor="#9CA3AF"
+                value={inputText}
+                onChangeText={handleTextChange}
+                multiline
+                textAlignVertical="center"
+                onFocus={handleInputFocus}
+                returnKeyType="send"
+                onSubmitEditing={sendMessage}
+                blurOnSubmit={false}
+              />
+            </View>
+            <TouchableOpacity 
+              className="w-10 h-10 rounded-full items-center justify-center mb-1 bg-blue-500" 
+              onPress={sendMessage}
             >
-              <Text className="text-white font-semibold text-center">ชำระเงิน</Text>
+              <Text className="text-white text-lg">➤</Text>
             </TouchableOpacity>
           </View>
-        ))}
+        </View>
+      </KeyboardAvoidingView>
 
-        {/* ปุ่มผู้ซื้อ: ยืนยัน / ยกเลิก */}
-        {showDeliveryButton && (
-          <View className="px-6 py-2 flex-row justify-center gap-3">
+      {/* ปุ่มลอยกรอกเลขขนส่งผู้ขาย */}
+      {showTrackingButton && (
+        <View className="absolute bottom-20 px-4 w-full">
+          <TouchableOpacity
+            className="bg-[#125c91] border border-black/50 py-3 px-4 rounded-lg shadow-lg items-center justify-center"
+            onPress={() => setTrackingModalVisible(true)}
+          >
+            <Text className="text-white font-semibold">กรอกเลขขนส่ง</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
-            <TouchableOpacity
-              className="w-1/2 bg-red-400 py-3 border border-black/50 px-4 rounded-lg items-center justify-center"
-              onPress={() => alert("ยกเลิกสินค้าเรียบร้อย")}
-            >
-              <Text className="text-white font-semibold">ยกเลิกสินค้า</Text>
-            </TouchableOpacity>
+      {/* Quotation Modal */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white w-11/12 h-[65vh] rounded-lg overflow-hidden">
+            <ScrollView className="px-4 pt-4 pb-24">
+              <Text className="text-lg font-semibold mb-2 text-center p-2 border-b text-[#125c91] border-gray-300">สร้างใบเสนอราคา</Text>
 
-            <TouchableOpacity
-              className="w-1/2 bg-green-400 py-3 px-4  border border-black/50 rounded-lg items-center justify-center"
-              onPress={handleConfirmDelivery}
-            >
-              <Text className="text-white font-semibold">ยืนยันได้รับสินค้า</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              <Text className="font-semibold text-black/70 py-2">ชื่อสินค้า</Text>
+              <TextInput
+                className="border border-black/50 p-2 mb-2 rounded"
+                placeholder="ชื่อสินค้า"
+                value={quotationData.productName}
+                onChangeText={(text) => setQuotationData({ ...quotationData, productName: text })}
+              />
 
-        {/* Input */}
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}>
-          <View className="bg-white border-t border-gray-200 px-4 py-3">
-            <View className="flex-row items-end space-x-2 gap-3">
-              {currentUserRole === "seller" && !hasSentQuotation && (
-                <TouchableOpacity className="px-3 py-2 rounded-full bg-green-500" onPress={() => setModalVisible(true)}>
-                  <Text className="text-white py-1 font-semibold">ส่งใบเสนอราคา</Text>
-                </TouchableOpacity>
-              )}
-              <View className="flex-1 bg-gray-100 rounded-3xl px-4 max-h-24">
-                <TextInput
-                  className="text-base text-gray-800"
-                  placeholder="พิมพ์ข้อความ..."
-                  placeholderTextColor="#9CA3AF"
-                  value={inputText}
-                  onChangeText={handleTextChange}
-                  multiline
-                  textAlignVertical="center"
-                  onFocus={handleInputFocus}
-                  returnKeyType="send"
-                  onSubmitEditing={sendMessage}
-                />
+              <Text className="font-semibold text-black/70 py-2">รายละเอียดสินค้า</Text>
+              <TextInput
+                className="border border-black/50 p-2 mb-2 rounded"
+                placeholder="รายละเอียด"
+                value={quotationData.details}
+                onChangeText={(text) => setQuotationData({ ...quotationData, details: text })}
+              />
+
+              <View className="mb-2">
+                <Text className="mb-1 font-semibold text-black/70 py-2">รูปภาพสินค้า (สูงสุด 3 รูป)</Text>
+                <View className="flex-row space-x-2 gap-3">
+                  {quotationData.images &&
+                    quotationData.images.split(",").map((uri, idx) => (
+                      <View key={idx} className="relative">
+                        <Image source={{ uri: uri.trim() }} className="w-20 h-20 rounded-lg border border-black/70" />
+                        <TouchableOpacity
+                          onPress={() => {
+                            const newImages = quotationData.images
+                              .split(",")
+                              .filter((_, i) => i !== idx)
+                              .join(",");
+                            setQuotationData({ ...quotationData, images: newImages });
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-400 w-5 h-5 rounded-full items-center justify-center"
+                        >
+                          <Text className="text-white text-xs">x</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+
+                  {(!quotationData.images || quotationData.images.split(",").length < 3) && (
+                    <TouchableOpacity
+                      className="w-20 h-20 ml-3 bg-gray-200 rounded-lg items-center justify-center"
+                      onPress={pickImage}
+                    >
+                      <Text className="text-gray-600 text-3xl">+</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
-              <TouchableOpacity className="w-10 h-10 rounded-full items-center justify-center mb-1 bg-blue-500" onPress={sendMessage}>
-                <Text className="text-white text-lg">➤</Text>
+
+              <Text className="font-semibold text-black/70 py-2">ราคา</Text>
+              <TextInput
+                className="border border-black/50 p-2 mb-2 rounded"
+                placeholder="ราคา"
+                keyboardType="numeric"
+                value={quotationData.price}
+                onChangeText={(text) => setQuotationData({ ...quotationData, price: text })}
+              />
+            </ScrollView>
+
+            <View className="flex-row justify-center items-center gap-2 p-4 border-t border-gray-200 bg-white">
+              <TouchableOpacity
+                className="flex-1 bg-gray-300 px-4 py-3 rounded"
+                onPress={() => {
+                  setModalVisible(false);
+                  setQuotationData({ productName: "", details: "", images: "", price: "" });
+                }}
+              >
+                <Text className="text-center font-semibold">ยกเลิก</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-1 bg-[#2251a2] px-4 py-3 rounded" onPress={sendQuotation}>
+                <Text className="text-white text-center font-semibold">ส่งใบเสนอราคา</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
+      </Modal>
 
-        {/* Quotation Modal */}
-        <Modal visible={modalVisible} transparent animationType="slide">
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="bg-white w-11/12 h-[65vh] rounded-lg overflow-hidden">
-              <ScrollView className="px-4 pt-4 pb-24">
-                <Text className="text-lg font-semibold mb-2 text-center p-2 border-b text-[#125c91] border-gray-300">สร้างใบเสนอราคา</Text>
-
-                <Text className="font-semibold text-black/70 py-2">ชื่อสินค้า</Text>
-                <TextInput
-                  className="border border-black/50 p-2 mb-2 rounded"
-                  placeholder="ชื่อสินค้า"
-                  value={quotationData.productName}
-                  onChangeText={(text) => setQuotationData({ ...quotationData, productName: text })}
-                />
-
-                <Text className="font-semibold text-black/70 py-2">รายละเอียดสินค้า</Text>
-                <TextInput
-                  className="border border-black/50 p-2 mb-2 rounded"
-                  placeholder="รายละเอียด"
-                  value={quotationData.details}
-                  onChangeText={(text) => setQuotationData({ ...quotationData, details: text })}
-                />
-
-                <View className="mb-2">
-                  <Text className="mb-1 font-semibold text-black/70 py-2">รูปภาพสินค้า (สูงสุด 3 รูป)</Text>
-                  <View className="flex-row space-x-2 gap-3">
-                    {quotationData.images &&
-                      quotationData.images.split(",").map((uri, idx) => (
-                        <View key={idx} className="relative">
-                          <Image source={{ uri: uri.trim() }} className="w-20 h-20 rounded-lg border border-black/70" />
-                          <TouchableOpacity
-                            onPress={() => {
-                              const newImages = quotationData.images
-                                .split(",")
-                                .filter((_, i) => i !== idx)
-                                .join(",");
-                              setQuotationData({ ...quotationData, images: newImages });
-                            }}
-                            className="absolute -top-2 -right-2 bg-red-400 w-5 h-5 rounded-full items-center justify-center"
-                          >
-                            <Text className="text-white text-xs">x</Text>
-                          </TouchableOpacity>
-                        </View>
-                      ))}
-
-                    {(!quotationData.images || quotationData.images.split(",").length < 3) && (
-                      <TouchableOpacity
-                        className="w-20 h-20 ml-3 bg-gray-200 rounded-lg items-center justify-center"
-                        onPress={pickImage}
-                      >
-                        <Text className="text-gray-600 text-3xl">+</Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-
-                <Text className="font-semibold text-black/70 py-2">ราคา</Text>
-                <TextInput
-                  className="border border-black/50 p-2 mb-2 rounded"
-                  placeholder="ราคา"
-                  keyboardType="numeric"
-                  value={quotationData.price}
-                  onChangeText={(text) => setQuotationData({ ...quotationData, price: text })}
-                />
-              </ScrollView>
-
-              <View className="flex-row justify-center items-center gap-2 p-4 border-t border-gray-200 bg-white">
-                <TouchableOpacity
-                  className="flex-1 bg-gray-300 px-4 py-3 rounded"
-                  onPress={() => {
-                    setModalVisible(false);
-                    setQuotationData({ productName: "", details: "", images: "", price: "" });
-                  }}
-                >
-                  <Text className="text-center font-semibold">ยกเลิก</Text>
-                </TouchableOpacity>
-                <TouchableOpacity className="flex-1 bg-[#2251a2] px-4 py-3 rounded" onPress={sendQuotation}>
-                  <Text className="text-white text-center font-semibold">ส่งใบเสนอราคา</Text>
-                </TouchableOpacity>
-              </View>
+      {/* Tracking Modal */}
+      <Modal visible={trackingModalVisible} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white w-11/12 p-4 rounded-lg">
+            <Text className="text-lg font-semibold pb-3 text-center text-[#125c91]">กรอกเลขขนส่ง</Text>
+            <TextInput
+              className="border p-2 mb-2 rounded border-black/50"
+              placeholder="เลขขนส่ง"
+              value={trackingNumber}
+              onChangeText={setTrackingNumber}
+            />
+            <View className="flex-row justify-center mt-2 gap-2">
+              <TouchableOpacity className="w-1/2 bg-gray-300 px-4 py-2 rounded" onPress={() => setTrackingModalVisible(false)}>
+                <Text className="text-center">ยกเลิก</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="w-1/2 bg-[#125c91] px-4 py-2 rounded" onPress={handleSendTrackingNumber}>
+                <Text className="text-white text-center">บันทึก</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-
-        {/* ปุ่มลอยกรอกเลขขนส่งผู้ขาย */}
-        {showTrackingButton && (
-          <View className="absolute bottom-20 px-4 w-full">
-            <TouchableOpacity
-              className="bg-[#125c91] border border-black/50 py-3 px-4 rounded-lg shadow-lg items-center justify-center"
-              onPress={() => setTrackingModalVisible(true)}
-            >
-              <Text className="text-white font-semibold">กรอกเลขขนส่ง</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-
-        {/* Tracking Modal */}
-        <Modal visible={trackingModalVisible} transparent animationType="fade">
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="bg-white w-11/12 p-4 rounded-lg">
-              <Text className="text-lg font-semibold pb-3 text-center text-[#125c91]">กรอกเลขขนส่ง</Text>
-              <TextInput
-                className="border p-2 mb-2 rounded border-black/50"
-                placeholder="เลขขนส่ง"
-                value={trackingNumber}
-                onChangeText={setTrackingNumber}
-              />
-              <View className="flex-row justify-center mt-2 gap-2">
-                <TouchableOpacity className="w-1/2 bg-gray-300 px-4 py-2 rounded" onPress={() => setTrackingModalVisible(false)}>
-                  <Text className="text-center">ยกเลิก</Text>
-                </TouchableOpacity>
-                <TouchableOpacity className="w-1/2 bg-[#125c91] px-4 py-2 rounded" onPress={handleSendTrackingNumber}>
-                  <Text className="text-white text-center">บันทึก</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

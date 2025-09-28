@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function Login({ navigation }) {
+
   const [clicklogin, setclicklogin] = useState(false);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -14,21 +15,48 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
 
   const handleChange = (text, index) => {
+
+    const cleanText = text.replace(/[^0-9]/g, '');
+    
     const newOtp = [...otp];
-    newOtp[index] = text;
+    newOtp[index] = cleanText;
     setOtp(newOtp);
 
-    if (text) {
+    if (cleanText) {
+
       if (index < 5) {
-        inputs.current[index + 1].focus();
+        setTimeout(() => {
+          inputs.current[index + 1]?.focus();
+        }, 10);
+        
       } else {
-        // ถ้าพิมพ์ครบ 6 ตัว ปิด keyboard
-        Keyboard.dismiss();
+
+        setTimeout(() => {
+          Keyboard.dismiss();
+        }, 100);
+      
       }
-    } else {
-      // ถ้ากดลบ ช่องก่อนหน้า
-      if (index > 0) {
-        inputs.current[index - 1].focus();
+    }
+  };
+
+  const handleKeyPress = (e, index) => {
+    
+    if (e.nativeEvent.key === 'Backspace') {
+      const newOtp = [...otp];
+      
+      if (otp[index]) {
+
+        newOtp[index] = "";
+        setOtp(newOtp);
+        
+      } else {
+        if (index > 0) {
+          newOtp[index - 1] = "";
+          setOtp(newOtp);
+          setTimeout(() => {
+            inputs.current[index - 1]?.focus();
+          }, 10);
+        }
       }
     }
   };
@@ -40,13 +68,18 @@ export default function Login({ navigation }) {
   const handleblack = () => {
     setEmail("");
     setPassword("");
+    setOtp(["", "", "", "", "", ""]);
     setclicklogin(false);
+
+    setError(null);
   };
 
   const handleOTP = () => {
     const otpValue = otp.join("");
     if (otpValue === "123456") {
       navigation.navigate("Home");
+    } else {
+      setError("Invalid OTP code");
     }
   };
 
@@ -105,18 +138,26 @@ export default function Login({ navigation }) {
             </View>
             <View className="flex-col items-center w-full h-1/2 px-2 py-6 relative">
               <View className="w-full flex py-4 flex-row justify-between">
+
                 {otp.map((value, index) => (
                   <TextInput
                     key={index}
                     ref={(ref) => (inputs.current[index] = ref)}
                     value={value}
                     onChangeText={(text) => handleChange(text, index)}
+                    onKeyPress={(e) => handleKeyPress(e, index)}
                     keyboardType="number-pad"
                     maxLength={1}
                     className="border border-gray-300 rounded-md w-14 h-14 text-center text-2xl font-bold text-black/60"
+                    selectTextOnFocus={true}
                   />
                 ))}
+
               </View>
+
+              {error && (
+                <Text className="text-red-500 text-center py-2">{error}</Text>
+              )}
 
               <Text className="text-center p-2 text-lg text-black/70">
                 Didn't receive code? <Text className="text-[#07439B] underline">Resend again</Text>
@@ -125,6 +166,7 @@ export default function Login({ navigation }) {
               <TouchableOpacity onPress={handleOTP} className="w-full bg-[#07439B] h-16 flex justify-center items-center rounded-md absolute bottom-0">
                 <Text className="text-white text-lg font-medium">Verify</Text>
               </TouchableOpacity>
+
             </View>
 
             <AntDesign

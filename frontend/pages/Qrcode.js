@@ -48,7 +48,7 @@ export default function PaymentPage({ navigation, route }) {
       setQuotationData(room.Payment.quotation);
       
     } catch (error) {
-      console.error('❌ Error fetching payment data:', error.message);
+      console.error(' Error fetching payment data:', error.message);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -94,23 +94,6 @@ export default function PaymentPage({ navigation, route }) {
 
 const handleConfirmPayment = async () => {
 
-  // try {
-  
-  //   const res = await fetch("http://localhost:5000/api/payment/confirm", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ roomId })
-  //   });
-
-  //   const result = await res.json();
-  //   console.log("💰 Updated quotation:", result);
-
-  //   setConfirmModalVisible(false);
-  //   navigation.goBack();
-
-  // } catch (err) {
-  //   console.error("Payment confirm error:", err);
-  // }
 
   setConfirmModalVisible(false);
   navigation.goBack();
