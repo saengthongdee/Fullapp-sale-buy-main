@@ -1,0 +1,67 @@
+import { useState } from "react";
+import { Text, View, Image, TextInput, TouchableOpacity ,Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+export default function Login({ navigation }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = () => {
+
+    if(!email?.trim() || !password?.trim()) {
+        setError("Please enter both email and password");
+        return
+    }
+    navigation.navigate("OTP", { email });
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
+      <View className="flex-1 bg-white px-4 py-4">
+        <View className="w-full h-[30%] flex justify-center items-center">
+          <View className="w-[70%] h-[80%]">
+            <Image
+              source={require("../../assets/logosafepro.webp")}
+              className="w-full h-full"
+            />
+          </View>
+        </View>
+
+        <Text className="text-center text-[23px] py-4 font-medium text-[#07439B]">
+          Sign in
+        </Text>
+
+        <View className="border border-black/20 rounded-md px-4 py-6 flex flex-col gap-6">
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            className="border border-black/20 rounded-md px-4 py-4 text-lg"
+            placeholder="Email"
+          />
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            className="border border-black/20 rounded-md px-4 py-4 text-lg"
+            placeholder="Password"
+            secureTextEntry={true}
+          />
+          {error ? (
+            <Text className="text-red-500 text-center">{error}</Text>
+          ) : null}
+          <Pressable
+            onPress={handleLogin}
+            className="bg-[#07439B] p-4 rounded-md flex justify-center items-center"
+          >
+            <Text className="text-white text-lg font-medium">Sign in</Text>
+          </Pressable>
+
+          <Text className="font-medium text-center text-black/50">
+            Already have an account?{" "}
+            <Text className="text-[#07439B]">Sign up</Text>
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}

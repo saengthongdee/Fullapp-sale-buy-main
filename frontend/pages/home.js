@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import {
   Text,
   View,
-  TouchableOpacity,
+  Pressable,
   TextInput,
   Image,
   Modal,
@@ -28,6 +28,8 @@ export default function HomePage({ navigation ,route }) {
   const [selectedRole, setSelectedRole] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [errorRole, setErrorRole] = useState(true);
+  
+  const [errorRoom , setErrorRoom] = useState('');
 
   // --------------------------
   // Handlers
@@ -39,8 +41,12 @@ export default function HomePage({ navigation ,route }) {
       setNotFound(false);
       console.log("Navigating to Room with role:", selectedRole);
       navigation.navigate("Room", { Idroom: "42565412" });
+
+      setErrorRoom('');
     } else {
+      
       setNotFound(true);
+      setErrorRoom('ไม่พบห้องนี้ กรุณาตรวจสอบรหัสอีกครั้ง ')
     }
   };
 
@@ -126,18 +132,16 @@ export default function HomePage({ navigation ,route }) {
                       onSubmitEditing={handleInput}
                     />
                   </View>
-                  <TouchableOpacity
+                  <Pressable
                     onPress={handleInput}
                     className="w-1/5 h-[90%] bg-[#125c91] flex justify-center items-center rounded-full"
                   >
                     <Text className="text-lg font-medium text-white">ค้นหา</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
 
                 {notFound && (
-                  <Text className="text-red-500 text-sm mt-2 absolute bottom-2 text-center">
-                    ไม่พบห้องนี้ กรุณาตรวจสอบรหัสอีกครั้ง
-                  </Text>
+                  <Text className="text-red-500 text-sm mt-2 absolute bottom-2 text-center"> {errorRoom} </Text>
                 )}
               </View>
 
@@ -146,7 +150,7 @@ export default function HomePage({ navigation ,route }) {
               -------------------------- */}
               <View className="h-auto w-full flex flex-row flex-wrap gap-2 justify-between px-6">
                 {/* Create Transaction */}
-                <TouchableOpacity
+                <Pressable
                   onPress={handleCreate}
                   className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2"
                 >
@@ -156,26 +160,22 @@ export default function HomePage({ navigation ,route }) {
                       className="w-[70%] h-[70%]"
                     />
                   </View>
-                  <Text className="font-semibold text-[#3e3e3e] text-sm">
-                    สร้างธุรกรรม
-                  </Text>
-                </TouchableOpacity>
+                  <Text className="font-semibold text-[#3e3e3e] text-sm"> สร้างธุรกรรม </Text>
+                </Pressable>
 
                 {/* Package */}
-                <TouchableOpacity className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2">
+                <Pressable className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2">
                   <View className="w-[60%] h-[60%] flex justify-center items-center">
                     <Image
                       source={require("../assets/icons8-package-96.png")}
                       className="w-[80%] h-[80%]"
                     />
                   </View>
-                  <Text className="font-semibold text-[#3e3e3e] text-sm">
-                    แพ็คเกจสุดคุ้ม
-                  </Text>
-                </TouchableOpacity>
+                  <Text className="font-semibold text-[#3e3e3e] text-sm"> แพ็คเกจสุดคุ้ม </Text>
+                </Pressable>
 
                 {/* Service Fee */}
-                <TouchableOpacity className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2">
+                <Pressable className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2">
                   <View className="w-[60%] h-[60%] flex justify-center items-center">
                     <Image
                       source={require("../assets/icons8-money-96.png")}
@@ -183,10 +183,10 @@ export default function HomePage({ navigation ,route }) {
                     />
                   </View>
                   <Text className="font-semibold text-[#3e3e3e] text-sm">อัตราค่าบริการ</Text>
-                </TouchableOpacity>
+                </Pressable>
 
                 {/* Add Bank */}
-                <TouchableOpacity className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2">
+                <Pressable className="w-[25%] aspect-square mb-2 flex justify-center items-center gap-2">
                   <View className="w-[60%] h-[60%] flex justify-center items-center">
                     <Image
                       source={require("../assets/icons8-bank-100.png")}
@@ -194,7 +194,7 @@ export default function HomePage({ navigation ,route }) {
                     />
                   </View>
                   <Text className="font-semibold text-[#3e3e3e] text-sm">เพิ่มธนาคาร</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
 
               {/* --------------------------
@@ -227,12 +227,12 @@ export default function HomePage({ navigation ,route }) {
               transparent={true}
               onRequestClose={handleCloseModal}
             >
-              <TouchableOpacity
+              <Pressable
                 className="flex-1 justify-center items-center bg-black/50"
                 activeOpacity={1}
                 onPress={() => setModalVisible(false)}
               >
-                <TouchableOpacity
+                <Pressable
                   activeOpacity={1}
                   className="w-[80%] bg-white p-4 rounded-2xl"
                 >
@@ -242,7 +242,7 @@ export default function HomePage({ navigation ,route }) {
 
                   {/* Role Buttons */}
                   <View className="w-full h-[20vh] p-2 py-4 flex justify-center items-center flex-row gap-3">
-                    <TouchableOpacity
+                    <Pressable
                       onPress={() => {
                         setSelectedRole("seller");
                         setErrorRole(true);
@@ -256,9 +256,9 @@ export default function HomePage({ navigation ,route }) {
                         className="w-[70%] h-[70%]"
                       />
                       <Text className="font-bold text-[#125c91]">ผู้ขาย</Text>
-                    </TouchableOpacity>
+                    </Pressable>
 
-                    <TouchableOpacity
+                    <Pressable
                       onPress={() => {
                         setSelectedRole("buyer");
                         setErrorRole(true);
@@ -272,7 +272,7 @@ export default function HomePage({ navigation ,route }) {
                         className="w-[70%] h-[70%]"
                       />
                       <Text className="font-bold text-[#125c91]">ผู้ซื้อ</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
 
                   {/* Error Message */}
@@ -283,16 +283,16 @@ export default function HomePage({ navigation ,route }) {
                   )}
 
                   {/* Submit Button */}
-                  <TouchableOpacity
+                  <Pressable
                     onPress={handleCreatesubmit}
                     className="bg-[#125c91] p-3 py-4 rounded-md"
                   >
                     <Text className="text-white text-center font-bold">
                       สร้างธุรกรรม
                     </Text>
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              </TouchableOpacity>
+                  </Pressable>
+                </Pressable>
+              </Pressable>
             </Modal>
 
           </View>
