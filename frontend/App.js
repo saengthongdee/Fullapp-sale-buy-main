@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 // pages
 import LoginPage from "./pages/auth/login";
 import OTP from "./pages/auth/auth_otp";
+import Register from "./pages/auth/register"
 import Homepage from "./pages/home";
 import RoomPage from "./pages/room";
 import PaymentPage from "./pages/Qrcode";
@@ -21,18 +22,19 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="Register"
 
         screenOptions={{
           headerShown: false,
           animation: "fade",
         }}
       >
+        <Stack.Screen name="Register" component={Register} initialParams={{userId:userId}}/>
         <Stack.Screen name="Login" component={LoginPage} initialParams={{ userId: userId }} />
         <Stack.Screen name="OTP"  component={OTP} initialParams={{ userId: userId }} />
         <Stack.Screen name="Home" component={Homepage} initialParams={{ userId: userId }}  />
         <Stack.Screen name="Room" component={RoomPage} initialParams={{ userId: userId }}  />
-        <Stack.Screen name="Messager" component={MessengerPage} initialParams={{userId: userId}}></Stack.Screen>
+        <Stack.Screen name="Messager" component={MessengerPage} initialParams={{userId: userId}}/>
 
         <Stack.Screen 
             name="PaymentPage" 

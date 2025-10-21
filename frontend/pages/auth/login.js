@@ -3,6 +3,7 @@ import { Text, View, Image, TextInput, TouchableOpacity ,Pressable } from "react
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login({ navigation }) {
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
