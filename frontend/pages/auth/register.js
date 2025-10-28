@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 
 export default function Register({ navigation }) {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [ConfirmPassword, setConfirmPassword] = useState("");
@@ -12,7 +13,7 @@ export default function Register({ navigation }) {
   const [check_email, setCheck_email] = useState(false);
   const [check_password, setCheck_password] = useState(false);
   const [check_confirmPassword, setCheck_confirmPassword] = useState(false);
-  const [confirmTouched, setConfirmTouched] = useState(false); // blur state
+  const [confirmTouched, setConfirmTouched] = useState(false);
   const [confirmError, setConfirmError] = useState("");
 
   const [checked, setChecked] = useState(false);
