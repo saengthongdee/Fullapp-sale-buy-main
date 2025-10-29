@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Clipboard } from "react-native";
-import ChatData from "../chat.json";
+import ChatData from "../../chat.json";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import QuotationModal from "./QuotationModal";
