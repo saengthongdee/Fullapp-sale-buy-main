@@ -22,8 +22,7 @@ export default function Register({ navigation }) {
     if (!email?.trim() || !password?.trim()) return;
 
     if (!check_email || !check_password || !check_confirmPassword || !checked) return;
-
-    
+     
   };
 
   useEffect(() => {
