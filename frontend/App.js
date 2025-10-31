@@ -9,7 +9,7 @@ import OTP from "./pages/auth/auth_otp";
 import Register from "./pages/auth/register"
 import HomePage from "./pages/homePage/home"
 import RoomPage from "./pages/room";
-import PaymentPage from "./pages/Qrcode";
+import PaymentPage from "./pages/paymentpage/PaymentPage";
 import MessengerPage from "./pages/messenger";
 
 const Stack = createNativeStackNavigator();

@@ -28,7 +28,9 @@ export default function HomePage({ navigation, route }) {
   const [selectedRole, setSelectedRole] = useState(null);
   const [notFound, setNotFound] = useState(false);
   const [errorRole, setErrorRole] = useState(true);
+  const [businessName , setBusinessName] = useState("");
   const [errorRoom, setErrorRoom] = useState("");
+  const [errorRoomName , setErrorRoomName] = useState(true);
 
   // --------------------------
   // Handlers
@@ -52,10 +54,17 @@ export default function HomePage({ navigation, route }) {
   const handleCreatesubmit = () => {
     
     if (selectedRole) {
-      console.log("Creating room with role:", selectedRole);
-      navigation.navigate("Room", { Idroom: "42565412", role: selectedRole });
-      setSelectedRole("");
-      setModalVisible(false);
+
+      if(!businessName?.trim()) {
+         setErrorRoomName(false);
+      }else {
+        navigation.navigate("Room", { Idroom: "42565412", role: selectedRole });
+        setSelectedRole("");
+        setModalVisible(false);
+        setErrorRoomName(true);
+        setBusinessName("");
+      }
+
     } else {
       setErrorRole(false);
     }
@@ -113,6 +122,10 @@ export default function HomePage({ navigation, route }) {
               setErrorRole={setErrorRole}
               handleCreatesubmit={handleCreatesubmit}
               handleCloseModal={handleCloseModal}
+              setBusinessName={setBusinessName}
+              businessName={businessName}
+              setErrorRoomName={setErrorRoomName}
+              errorRoomName={errorRoomName}
             />
           </View>
         </TouchableWithoutFeedback>
