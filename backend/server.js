@@ -8,7 +8,6 @@ const errorHandler = require('./middleware/errorHandler');
 // Load environment variables
 dotenv.config();
 
-// เชื่อมต่อ MongoDB
 connectDatabase();
 
 const app = express();

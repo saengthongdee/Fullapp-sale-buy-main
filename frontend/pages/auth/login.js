@@ -11,7 +11,7 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+   const handleLogin = async () => {
 
     if(!email?.trim() || !password?.trim()) {
         setError("Please enter both email and password");
@@ -28,21 +28,19 @@ export default function Login({ navigation }) {
       );
 
       if (response.status === 200 && response.data.success) {
-      const { token, user } = response.data.data;
+        const { token, user } = response.data.data;
 
-      await SecureStore.setItemAsync('token', token);
-      await SecureStore.setItemAsync('user_id', user.id);
+        await SecureStore.setItemAsync('token', token);
+        await SecureStore.setItemAsync('user_id', user.id);
 
-      console.log('Login successful, token & user_id saved!');
+        
+        navigation.navigate("OTP", { email });
     }
-
 
     } catch (error) {
       console.log("error : " , error)
     }
-
-
-    navigation.navigate("OTP", { email });
+    
   };
 
   return (

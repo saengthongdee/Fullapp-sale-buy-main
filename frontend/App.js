@@ -5,7 +5,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { getItem } from './storage';
 
-// pages
 import LoginPage from "./pages/auth/login";
 import OTP from "./pages/auth/auth_otp";
 import Register from "./pages/auth/register";
@@ -17,20 +16,24 @@ import MessengerPage from "./pages/messenger";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
   const [initialRoute, setInitialRoute] = useState(null);
-  const [userId, setUserId] = useState("101");
+  const [userId, setUserId] = useState("205");
 
   useEffect(() => {
+
     async function checkToken() {
-      const token = await getItem('token');
-      const storedUserId = await getItem('user_id');
-
-      if (token && token.trim() && storedUserId) {
-
-        setUserId(storedUserId);
-        setInitialRoute('Home');
+      try {
         
-      } else {
+        const token = await getItem('token');
+        const storedUserId = await getItem('user_id');
+
+        if (!token || String(token || '').trim() === "" || !storedUserId) {
+          setInitialRoute('Login');
+        } else {
+          setInitialRoute('Home');
+        }
+      } catch (error) {
         setInitialRoute('Login');
       }
     }
@@ -56,13 +59,12 @@ export default function App() {
         }}
       >
         <Stack.Screen name="Register" component={Register} initialParams={{ userId: userId }} />
-        <Stack.Screen name="Login" component={LoginPage} initialParams={{ userId: userId, setUserId: setUserId }}/>
+        <Stack.Screen name="Login" component={LoginPage} initialParams={{ userId: userId }} />
         <Stack.Screen name="OTP" component={OTP} initialParams={{ userId: userId }} />
         <Stack.Screen name="Home" component={HomePage} initialParams={{ userId: userId }} />
         <Stack.Screen name="Room" component={RoomPage} initialParams={{ userId: userId }} />
         <Stack.Screen name="Messager" component={MessengerPage} initialParams={{ userId: userId }} />
-        <Stack.Screen  name="PaymentPage" component={PaymentPage}  options={{ animation: "slide_from_right" }} />
-
+        <Stack.Screen name="PaymentPage" component={PaymentPage} options={{ animation: "slide_from_right" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
