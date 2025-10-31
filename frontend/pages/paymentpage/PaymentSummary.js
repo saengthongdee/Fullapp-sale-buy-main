@@ -9,7 +9,7 @@ export default function PaymentSummary({ price }) {
     <View className="bg-white mx-4 mt-4 p-4 rounded-lg shadow-sm">
       <Text className="text-lg font-bold text-gray-800 mb-3"> สรุปการชำระเงิน </Text>
       <View className="flex-row justify-between mb-2">
-        <Text className="text-gray-600">ราคาสินค้า</Text>
+        <Text className="text-gray-600">ราคาสินค้า..........</Text>
         <Text className="text-gray-800">฿{price}</Text>
       </View>
       <View className="flex-row justify-between mb-2">
