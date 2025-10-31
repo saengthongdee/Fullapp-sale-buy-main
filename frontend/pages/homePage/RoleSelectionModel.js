@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, Pressable, Image, Modal } from "react-native";
+import { Text, View, Pressable, Image, Modal , TextInput } from "react-native";
 
 export default function RoleSelectionModal({
   modalVisible,
@@ -10,6 +10,10 @@ export default function RoleSelectionModal({
   setErrorRole,
   handleCreatesubmit,
   handleCloseModal,
+  setBusinessName,
+  businessName,
+  setErrorRoomName,
+  errorRoomName
 }) {
   return (
     <Modal
@@ -65,11 +69,21 @@ export default function RoleSelectionModal({
               <Text className="font-bold text-[#125c91]">ผู้ซื้อ</Text>
             </Pressable>
           </View>
+          <View className="w-full h-20 flex justify-center items-center">
+            <TextInput value={businessName} onChangeText={setBusinessName} className="w-full h-14 p-3 border border-black/20 rounded-md " placeholder="ระบุชื่อธุรกรรม"></TextInput>
+          </View>
+
 
           {/* Error Message */}
           {!errorRole && (
-            <Text className="text-center py-2 text-red-500 font-semibold">
+            <Text className="text-center py-2  text-red-500 font-semibold">
               กรุณาเลือกบทบาทผู้สร้างธุรกรรม
+            </Text>
+          )}
+
+          {!errorRoomName && (
+            <Text className="text-center py-2  text-red-500 font-semibold">
+              กรุณากรอกชื่อธุรกรรม
             </Text>
           )}
 
