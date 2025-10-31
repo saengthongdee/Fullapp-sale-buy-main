@@ -114,6 +114,8 @@ export default function RoomPage({ navigation, route }) {
 
   const showTrackingButton = currentUserRole === "seller" && paidQuotations.length > 0 && !hasTracking;
 
+
+  // ใบเสอนสินค้า
   const sendQuotation = () => {
     if (!quotationData.productName || !quotationData.price) {
       return alert("กรุณากรอกชื่อสินค้าและราคา");
@@ -132,7 +134,9 @@ export default function RoomPage({ navigation, route }) {
     setModalVisible(false);
   };
 
+  // ชำระงิน
   const handlePayQuotation = (quotationId) => {
+
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === quotationId
@@ -149,7 +153,9 @@ export default function RoomPage({ navigation, route }) {
       text: "ชำระเงินเสร็จสิ้น สามารถส่งของได้เลยครับ",
       timestamp: Math.floor(Date.now() / 1000),
     };
+
     setMessages((prev) => [...prev, paidMsg]);
+
   };
 
   const handleSendTrackingNumber = () => {
