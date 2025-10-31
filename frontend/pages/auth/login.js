@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Text, View, Image, TextInput, TouchableOpacity ,Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as SecureStore from 'expo-secure-store';
+
+import axios from "axios"
 
 export default function Login({ navigation }) {
   
@@ -8,12 +11,37 @@ export default function Login({ navigation }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
 
     if(!email?.trim() || !password?.trim()) {
         setError("Please enter both email and password");
         return
     }
+
+    try {
+
+      const response = await axios.post('http://localhost:5000/api/auth/login',
+        {
+          email,
+          password
+        }
+      );
+
+      if (response.status === 200 && response.data.success) {
+      const { token, user } = response.data.data;
+
+      await SecureStore.setItemAsync('token', token);
+      await SecureStore.setItemAsync('user_id', user.id);
+
+      console.log('Login successful, token & user_id saved!');
+    }
+
+
+    } catch (error) {
+      console.log("error : " , error)
+    }
+
+
     navigation.navigate("OTP", { email });
   };
 
