@@ -1,46 +1,41 @@
 import { useState } from "react";
-import { Text, View, Image, TextInput, TouchableOpacity ,Pressable } from "react-native";
+import { Text, View, Image, TextInput, Pressable, onPress } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 
-import axios from "axios"
+import axios from "axios";
 
 export default function Login({ navigation }) {
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-   const handleLogin = async () => {
-
-    if(!email?.trim() || !password?.trim()) {
-        setError("Please enter both email and password");
-        return
+  const handleLogin = async () => {
+    if (!email?.trim() || !password?.trim()) {
+      setError("Please enter both email and password");
+      return;
     }
 
     try {
-
-      const response = await axios.post('http://localhost:5000/api/auth/login',
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
         {
           email,
-          password
+          password,
         }
       );
 
       if (response.status === 200 && response.data.success) {
         const { token, user } = response.data.data;
 
-        await SecureStore.setItemAsync('token', token);
-        await SecureStore.setItemAsync('user_id', user.id);
+        await SecureStore.setItemAsync("token", token);
+        await SecureStore.setItemAsync("user_id", user.id);
 
-        
         navigation.navigate("OTP", { email });
-    }
-
+      }
     } catch (error) {
-      console.log("error : " , error)
+      console.log("error : ", error);
     }
-    
   };
 
   return (
@@ -55,7 +50,7 @@ export default function Login({ navigation }) {
           </View>
         </View>
 
-        <Text className="text-center text-[23px] py-4 font-medium text-[#07439B]">
+        <Text className="text-center text-[23px] py-4 font-medium text-[#125c91]">
           Sign in
         </Text>
 
@@ -78,15 +73,19 @@ export default function Login({ navigation }) {
           ) : null}
           <Pressable
             onPress={handleLogin}
-            className="bg-[#07439B] p-4 rounded-md flex justify-center items-center"
+            className="bg-[#125c91] p-4 rounded-md flex justify-center items-center"
           >
-            <Text className="text-white text-lg font-medium">Sign in</Text>
+            <Text className="text-white text-lg font-medium ">Sign in</Text>
           </Pressable>
 
-          <Text className="font-medium text-center text-black/50">
-            Already have an account?{" "}
-            <Text className="text-[#07439B]">Sign up</Text>
-          </Text>
+          <View className="flex flex-row justify-center items-center gap-3">
+            <Text className="font-medium text-center flex gap-2 text-black/50">
+              Already have an account?
+            </Text>
+            <Pressable onPress={() => navigation.navigate("Register")}>
+              <Text className="text-[#125c91]">Sign up</Text>
+            </Pressable>
+          </View>
         </View>
       </View>
     </SafeAreaView>
