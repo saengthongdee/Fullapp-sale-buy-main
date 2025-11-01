@@ -49,7 +49,7 @@ export default function OtpVerification({ route, navigation }) {
     <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
       <View className="flex-1 bg-white px-4 py-4 ">
         <Pressable onPress={() => navigation.goBack()}>
-          <AntDesign name="left" size={32} color="gray" />
+          <AntDesign name="left" size={30} color="gray" />
         </Pressable>
 
         <View className="flex flex-col gap-2 justify-center items-center py-4">

@@ -7,38 +7,40 @@ import { getItem } from './storage';
 
 import LoginPage from "./pages/auth/login";
 import OTP from "./pages/auth/auth_otp";
-import Register from "./pages/auth/register";
+import Register from "./pages/auth/register/Register";
 import HomePage from "./pages/homePage/home";
 import RoomPage from "./pages/room";
 import PaymentPage from "./pages/paymentpage/PaymentPage";
 import MessengerPage from "./pages/messenger";
+import confirmEmail from "./pages/auth/register/confirmemail";
+import Terms from "./pages/auth/Terms";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
 
-  const [initialRoute, setInitialRoute] = useState(null);
+  const [initialRoute, setInitialRoute] = useState('ConfirmEmail');
   const [userId, setUserId] = useState("205");
 
   useEffect(() => {
 
-    async function checkToken() {
-      try {
+    // async function checkToken() {
+    //   try {
         
-        const token = await getItem('token');
-        const storedUserId = await getItem('user_id');
+    //     const token = await getItem('token');
+    //     const storedUserId = await getItem('user_id');
 
-        if (!token || String(token || '').trim() === "" || !storedUserId) {
-          setInitialRoute('Login');
-        } else {
-          setInitialRoute('Home');
-        }
-      } catch (error) {
-        setInitialRoute('Login');
-      }
-    }
+    //     if (!token || String(token || '').trim() === "" || !storedUserId) {
+    //       setInitialRoute('Login');
+    //     } else {
+    //       setInitialRoute('Home');
+    //     }
+    //   } catch (error) {
+    //     setInitialRoute('Login');
+    //   }
+    // }
 
-    checkToken();
+    // checkToken();
   }, []);
 
   if (!initialRoute) {
@@ -58,12 +60,14 @@ export default function App() {
           animation: "fade",
         }}
       >
-        <Stack.Screen name="Register" component={Register} initialParams={{ userId: userId }} />
+        <Stack.Screen name="Register" component={Register}/>
         <Stack.Screen name="Login" component={LoginPage} initialParams={{ userId: userId }} />
-        <Stack.Screen name="OTP" component={OTP} initialParams={{ userId: userId }} />
+        <Stack.Screen name="OTP" component={OTP}/>
+        <Stack.Screen name="Terms" component={Terms}/>
         <Stack.Screen name="Home" component={HomePage} initialParams={{ userId: userId }} />
         <Stack.Screen name="Room" component={RoomPage} initialParams={{ userId: userId }} />
         <Stack.Screen name="Messager" component={MessengerPage} initialParams={{ userId: userId }} />
+        <Stack.Screen name="ConfirmEmail" component={confirmEmail} options={{animation: "slide_from_right"}}/>
         <Stack.Screen name="PaymentPage" component={PaymentPage} options={{ animation: "slide_from_right" }} />
       </Stack.Navigator>
     </NavigationContainer>
