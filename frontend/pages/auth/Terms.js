@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Text, View, Pressable, ScrollView, onPress } from "react-native";
+import { Text, View, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import TermsData from "../../Terms.json";
@@ -26,7 +26,7 @@ export default function Terms({navigation}) {
           <ScrollView className="mt-8">
             <View className=" ">
               {TermsData.sections.map((items, index) => (
-                <View className="flex gap-3">
+                <View key={index} className="flex gap-3">
                   <Text className="text-sm">{items.header}</Text>
                   <Text className="text-sm">{items.content}</Text>
                 </View>

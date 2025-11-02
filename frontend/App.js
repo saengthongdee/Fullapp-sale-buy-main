@@ -19,7 +19,7 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
 
-  const [initialRoute, setInitialRoute] = useState('Login');
+  const [initialRoute, setInitialRoute] = useState('Home');
   const [userId, setUserId] = useState("205");
 
   useEffect(() => {

@@ -88,7 +88,7 @@ export default function HomePage({ navigation, route }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View className="flex-1 overflow-hidden">
             <ScrollView
-              className="flex-1 "
+              className="flex-1"
               contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
