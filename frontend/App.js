@@ -24,23 +24,23 @@ export default function App() {
 
   useEffect(() => {
 
-    // async function checkToken() {
-    //   try {
+    async function checkToken() {
+      try {
         
-    //     const token = await getItem('token');
-    //     const storedUserId = await getItem('user_id');
+        const token = await getItem('token');
+        const storedUserId = await getItem('user_id');
 
-    //     if (!token || String(token || '').trim() === "" || !storedUserId) {
-    //       setInitialRoute('Login');
-    //     } else {
-    //       setInitialRoute('Home');
-    //     }
-    //   } catch (error) {
-    //     setInitialRoute('Login');
-    //   }
-    // }
+        if (!token || String(token || '').trim() === "" || !storedUserId) {
+          setInitialRoute('Login');
+        } else {
+          setInitialRoute('Home');
+        }
+      } catch (error) {
+        setInitialRoute('Login');
+      }
+    }
 
-    // checkToken();
+    checkToken();
   }, []);
 
   if (!initialRoute) {
