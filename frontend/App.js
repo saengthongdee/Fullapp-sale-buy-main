@@ -19,28 +19,28 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
 
-  const [initialRoute, setInitialRoute] = useState('Home');
+  const [initialRoute, setInitialRoute] = useState(null);
   const [userId, setUserId] = useState("205");
 
   useEffect(() => {
 
-    // async function checkToken() {
-    //   try {
+    async function checkToken() {
+      try {
         
-    //     const token = await getItem('token');
-    //     const storedUserId = await getItem('user_id');
+        const token = await getItem('token');
+        const storedUserId = await getItem('user_id');
 
-    //     if (!token || String(token || '').trim() === "" || !storedUserId) {
-    //       setInitialRoute('Login');
-    //     } else {
-    //       setInitialRoute('Home');
-    //     }
-    //   } catch (error) {
-    //     setInitialRoute('Login');
-    //   }
-    // }
+        if (!token || String(token || '').trim() === "" || !storedUserId) {
+          setInitialRoute('Login');
+        } else {
+          setInitialRoute('Home');
+        }
+      } catch (error) {
+        setInitialRoute('Login');
+      }
+    }
 
-    // checkToken();
+    checkToken();
   }, []);
 
   if (!initialRoute) {
