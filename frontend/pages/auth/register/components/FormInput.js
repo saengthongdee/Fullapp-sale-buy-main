@@ -13,6 +13,7 @@ export default function FormInput({
   keyboardType = "default",
   autoCapitalize = "none",
   maxLength,
+  ConfirmEmail
 }) {
 
   const handleClik = () => {
@@ -25,7 +26,7 @@ export default function FormInput({
         <View className="relative flex">
           <View
             className={`w-5 h-5 rounded-md absolute right-2 top-1 ${
-              validated ? "bg-[#125c91]" : ""
+              validated && ConfirmEmail ? "bg-[#125c91]" : ""
             }`}
           ></View>
           <TextInput

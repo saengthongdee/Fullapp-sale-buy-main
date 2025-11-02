@@ -10,6 +10,7 @@ import PasswordInput from "./components/PasswordInput";
 import PasswordRequirements from "./components/PasswordRequirements";
 import CheckboxAgreement from "./components/CheckboxAgreement";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import axios from "axios";
 
 import {
   validateFullname,
@@ -33,6 +34,7 @@ export default function Register({ navigation }) {
   const [check_password, setCheck_password] = useState(false);
   const [checked, setChecked] = useState(false);
   const [checkfulldata , setCheckfulldata] = useState(false);
+  const [ConfirmEmail , setConfirmEmail] = useState(true);
 
   const handleCreate = () => {
 
@@ -60,7 +62,27 @@ export default function Register({ navigation }) {
   }, [phone]);
 
   useEffect(() => {
+
     setCheck_email(validateEmail(email));
+
+    const checkemail = async () => {
+      try {
+
+        const response = await axios.post('' , { email });
+
+        if(response.status === 200) {
+          setConfirmEmail(true);
+        }else {
+          setConfirmEmail(false);
+        }
+
+      }catch(err) {
+        console.log("internet error" , err);
+      }
+    }
+    checkemail();
+
+
   }, [email]);
 
   useEffect(() => {
@@ -119,7 +141,12 @@ export default function Register({ navigation }) {
               validated={check_email}
               keyboardType="email-address"
               autoCapitalize="none"
+              ConfirmEmail={ConfirmEmail}
             />
+            {ConfirmEmail 
+            ?(<View><Text className="hidden"></Text></View>) 
+            
+            :(<View><Text className="text-red-500 text-sm">บัญชีนี้เคยถูกใช้ไปแล้ว</Text></View>)}
 
             {/* Password */}
             <PasswordInput
