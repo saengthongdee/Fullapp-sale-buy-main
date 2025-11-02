@@ -33,7 +33,7 @@ export default function App() {
         if (!token || String(token || '').trim() === "" || !storedUserId) {
           setInitialRoute('Login');
         } else {
-          setInitialRoute('Home');
+          setInitialRoute('Login');
         }
       } catch (error) {
         setInitialRoute('Login');

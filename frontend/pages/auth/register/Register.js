@@ -39,6 +39,7 @@ export default function Register({ navigation }) {
     if (!fullname.trim() || !phone.trim() || !email.trim() || !password.trim()) {
       setCheckfulldata(false);
       return;
+      
     }else{
        setCheckfulldata(true); 
     }
