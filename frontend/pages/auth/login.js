@@ -11,11 +11,14 @@ export default function Login({ navigation }) {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
+
      if (!email?.trim() || !password?.trim()) {
        setError("Please enter both email and password");
        return;
      }
-     navigation.navigate("OTP" , email);
+
+    //  navigation.navigate("OTP" , email);
+    
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/login",
