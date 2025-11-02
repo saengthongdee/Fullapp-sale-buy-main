@@ -11,31 +11,31 @@ export default function Login({ navigation }) {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    if (!email?.trim() || !password?.trim()) {
-      setError("Please enter both email and password");
-      return;
-    }
+     if (!email?.trim() || !password?.trim()) {
+       setError("Please enter both email and password");
+       return;
+     }
+     navigation.navigate("OTP" , email);
+    // try {
+    //   const response = await axios.post(
+    //     "http://localhost:5000/api/auth/login",
+    //     {
+    //       email,
+    //       password,
+    //     }
+    //   );
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+    //   if (response.status === 200 && response.data.success) {
+    //     const { token, user } = response.data.data;
 
-      if (response.status === 200 && response.data.success) {
-        const { token, user } = response.data.data;
+    //     await SecureStore.setItemAsync("token", token);
+    //     await SecureStore.setItemAsync("user_id", user.id);
 
-        await SecureStore.setItemAsync("token", token);
-        await SecureStore.setItemAsync("user_id", user.id);
-
-        navigation.navigate("OTP", { email });
-      }
-    } catch (error) {
-      console.log("error : ", error);
-    }
+    //     navigation.navigate("OTP", { email });
+    //   }
+    // } catch (error) {
+    //   console.log("error : ", error);
+    // }
   };
 
   return (

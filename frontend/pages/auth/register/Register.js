@@ -68,7 +68,7 @@ export default function Register({ navigation }) {
   }, [password]);
 
   useEffect(() => {
-    if (!fullname.trim() || !phone.trim() || !email.trim() || !password.trim()) {
+    if (!fullname.trim() || !phone.trim() || !email.trim() || !password.trim() ||phone.length !== 10) {
         setCheckfulldata(false);
         return;
     }else{
